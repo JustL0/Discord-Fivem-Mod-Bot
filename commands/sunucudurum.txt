@@ -1,0 +1,88 @@
+const { Client, EmbedBuilder } = require("discord.js");
+const axios = require("axios");
+const config = require("../config.json");
+
+const serverStatusChannelId = "SUNUCU_DURUMU_KANAL_ID"; // Sunucu durumunun gönderileceği kanal ID'sini buraya girin
+
+let currentEmbed = null;
+
+const createEmbed = (status, aktifOyuncu, maxSlot, serverMs) => {
+  const embedColor = status === "online" ? "#00FF00" : "#FF0000";
+  const embedTitle = status === "online" ? "Sunucu Aktif 🟢" : "Sunucu Kapalı 🔴";
+  const embedDescription = status === "online" ? "Sunucu şu anda aktif durumda." : "Sunucu şu anda kapalı durumda.";
+  const hizliBaglantiButonlari = `steam://connect/${config.fivemServerIP}`;
+
+  const embed = new EmbedBuilder()
+    .setColor(embedColor)
+    .setTitle(embedTitle)
+    .setDescription(embedDescription)
+    .addFields(
+        { name: "Aktif Oyuncu / Kalan Slot", value: `${aktifOyuncu} / ${maxSlot}`, inline: true },
+        { name: "Server Ms", value: `${serverMs} ms`, inline: true }
+      )
+
+  return embed;
+};
+
+const updateEmbed = async (channel) => {
+  const sunucuIP = config.fivemServerIP;
+  const apiUrl = `https://servers-live.fivem.net/api/servers/single/${sunucuIP}`;
+
+  try {
+    const response = await axios.get(apiUrl);
+    const serverData = response.data;
+
+    const aktifOyuncu = serverData.clients;
+    const maxSlot = serverData.svMaxclients;
+    const serverMs = serverData.ping;
+    const status = serverDataDataDataData === "ONLINE" ? "online" : "offline";
+
+    const newEmbed = createEmbed(status, aktifOyuncu, maxSlot, serverMs);
+
+    if (currentEmbed) {
+      currentEmbed.delete(); // Eski embed'i sil
+    }
+
+    currentEmbed = await channel.send({ embeds: [newEmbed] });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+module.exports = {
+  name: "sunucu-durumu",
+  description: "Fivem sunucu durumunu gösterir.",
+  type: 1,
+  options: [],
+
+  run: async (client, interaction) => {
+    const sunucuIP = config.fivemServerIP;
+    const apiUrl = `https://servers-live.fivem.net/api/servers/single/${sunucuIP}`;
+
+    try {
+      const response = await axios.get(apiUrl);
+      const serverData = response.data;
+
+      const aktifOyuncu = serverData.clients;
+      const maxSlot = serverData.svMaxclients;
+      const serverMs = serverData.ping;
+      const status = serverDataDataDataData === "ONLINE" ? "online" : "offline";
+
+      const embed = createEmbed(status, aktifOyuncu, maxSlot, serverMs);
+
+      interaction.reply({ embeds: [embed], ephemeral: false });
+
+      const serverStatusChannel = client.channels.cache.get(serverStatusChannelId);
+      if (serverStatusChannel && serverStatusChannel.isText()) {
+        updateEmbed(serverStatusChannel);
+
+        setInterval(() => {
+          updateEmbed(serverStatusChannel);
+        }, 5 * 60 * 1000); // Her 5 dakikada bir embedi güncelle
+      }
+    } catch (error) {
+      console.error(error);
+      interaction.reply({ content: "Sunucu durumu alınırken bir hata oluştu.", ephemeral: true });
+    }
+  }
+};

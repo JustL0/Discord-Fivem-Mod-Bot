@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^1.7.0",
+    "@discordjs/voice": "^0.16.0",
+    "axios": "^1.4.0",
+    "better-sqlite3": "^8.4.0",
+    "chalk-advanced": "^1.0.6",
+    "discord-api-types": "^0.37.38",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.0.3",
+    "fs": "^0.0.1-security",
+    "quick.db": "^9.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.20"
+  }
+}
